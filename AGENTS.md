@@ -325,14 +325,14 @@ more testable and idiomatic in modern .NET.
 
 ## 8. Phase 5 — Monitor API Endpoints
 
-- [ ] `GET /stats` — read Redis counters, compute hit rate %
-- [ ] `GET /stats/history` — return last 60 per-minute buckets from Redis
-- [ ] `GET /monitor/documents` — enriched document list with chunk counts
-- [ ] `GET /monitor/cache` — list all `rag:cache:*` keys via `KeysAsync` scan, return with TTL and question text
-- [ ] `DELETE /monitor/cache/{hash}` — delete one cache entry + remove from set
-- [ ] `DELETE /monitor/cache` — flush all cache entries
-- [ ] `GET /monitor/qstash-jobs` — proxy to QStash REST API, return recent messages
-- [ ] `POST /monitor/vector/query` — raw vector probe: embed input, query Vector, return scored results
+- [x] `GET /stats` — read Redis counters, compute hit rate %
+- [x] `GET /stats/history` — return last 60 per-minute buckets from Redis
+- [x] `GET /monitor/documents` — enriched document list with chunk counts
+- [x] `GET /monitor/cache` — list all `rag:cache:*` keys via `KeysAsync` scan, return with TTL and question text
+- [x] `DELETE /monitor/cache/{hash}` — delete one cache entry + remove from set
+- [x] `DELETE /monitor/cache` — flush all cache entries
+- [x] `GET /monitor/qstash-jobs` — proxy to QStash REST API, return recent messages
+- [x] `POST /monitor/vector/query` — raw vector probe: embed input, query Vector, return scored results
 
 > All `/monitor/*` endpoints should be protected — even a simple hardcoded API key header
 > (`X-Monitor-Key`) is sufficient for a portfolio project.

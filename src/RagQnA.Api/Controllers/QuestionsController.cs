@@ -82,6 +82,7 @@ public sealed class QuestionsController : ControllerBase
 
         var response = new QuestionResponse
         {
+            Question = normalised,
             Answer = answer,
             Cached = false,
             DurationMs = sw.ElapsedMilliseconds,

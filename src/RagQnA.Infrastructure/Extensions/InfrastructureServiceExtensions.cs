@@ -22,6 +22,7 @@ public static class InfrastructureServiceExtensions
         services.Configure<AnthropicOptions>(configuration.GetSection("Anthropic"));
         services.Configure<IngestionOptions>(configuration.GetSection("Ingestion"));
         services.Configure<CacheOptions>(configuration.GetSection("Cache"));
+        services.Configure<MonitorOptions>(configuration.GetSection("Monitor"));
 
         // Upstash Redis
         services.AddHttpClient<IUpstashRedisClient, UpstashRedisClient>("UpstashRedis")
