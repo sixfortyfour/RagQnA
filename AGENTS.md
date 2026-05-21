@@ -233,18 +233,18 @@ more testable and idiomatic in modern .NET.
 
 **Project:** `RagQnA.Api`
 
-- [ ] Create ASP.NET Core Web API project (net8.0)
-- [ ] Add `appsettings.json` / `appsettings.Development.json` with placeholder config keys
+- [x] Create ASP.NET Core Web API project (net8.0)
+- [x] Add `appsettings.json` / `appsettings.Development.json` with placeholder config keys
 - [x] Add `.env.example` to repo root
 - [x] Add `.gitignore` covering: `.env`, `appsettings.*.json` secrets, `node_modules/`, `bin/`, `obj/`, `*.user`
-- [ ] Configure CORS for `http://localhost:5173` (demo) and `http://localhost:5174` (monitor)
-- [ ] Add global exception handling middleware → consistent `ProblemDetails` responses
-- [ ] Add request logging middleware
-- [ ] Configure Swagger / Scalar for API docs
-- [ ] Configure `multipart/form-data` max file size from `IngestionOptions.MaxFileSizeMb`
+- [x] Configure CORS for `http://localhost:5173` (demo) and `http://localhost:5174` (monitor)
+- [x] Add global exception handling middleware → consistent `ProblemDetails` responses
+- [x] Add request logging middleware
+- [x] Configure Swagger / Scalar for API docs
+- [x] Configure `multipart/form-data` max file size from `IngestionOptions.MaxFileSizeMb`
   - > **Note:** Upstash Redis has a 1MB per-value limit. If storing raw file content in Redis
     > temporarily (see Phase 3), enforce a file size limit well below this. Recommended default: `MAX_FILE_SIZE_MB=5` stored to local temp, not Redis.
-- [ ] Register `AddInfrastructure()` in `Program.cs`
+- [x] Register `AddInfrastructure()` in `Program.cs`
 
 ---
 
