@@ -252,46 +252,46 @@ more testable and idiomatic in modern .NET.
 
 ### 6.1 DocumentsController
 
-- [ ] `POST /documents` — accept `multipart/form-data` (file upload)
-  - [ ] Validate file type (PDF, TXT, MD)
-  - [ ] Validate file size against `IngestionOptions.MaxFileSizeMb`
-  - [ ] Generate document ID (`Guid`)
-  - [ ] **Save file to `Path.GetTempPath()/{documentId}`** — raw content must survive until the
+- [x] `POST /documents` — accept `multipart/form-data` (file upload)
+  - [x] Validate file type (PDF, TXT, MD)
+  - [x] Validate file size against `IngestionOptions.MaxFileSizeMb`
+  - [x] Generate document ID (`Guid`)
+  - [x] **Save file to `Path.GetTempPath()/{documentId}`** — raw content must survive until the
         QStash callback fires. Do not store binary content in Redis (1MB value limit).
-  - [ ] Store metadata in Redis hash (`rag:doc:{id}`): `fileName`, `status=pending`, `createdAt`, `tempFilePath`
-  - [ ] Add ID to Redis set (`rag:doc:all`)
-  - [ ] Publish QStash message to `/internal/process-document` with payload `{ documentId }`
-  - [ ] Return `202 Accepted` with `{ documentId, statusUrl }`
-- [ ] `GET /documents` — list all documents from Redis
-- [ ] `GET /documents/{id}/status` — polling endpoint; reads Redis hash
-- [ ] `GET /documents/{id}/chunks` — fetches chunk vectors from Upstash Vector by docId filter
-- [ ] `DELETE /documents/{id}` — remove document and all associated data
-  - [ ] Delete Redis hash `rag:doc:{id}`
-  - [ ] Remove from `rag:doc:all` set
-  - [ ] Delete all Vector chunks where metadata `docId == {id}`
-  - [ ] Clean up temp file if still present
+  - [x] Store metadata in Redis hash (`rag:doc:{id}`): `fileName`, `status=pending`, `createdAt`, `tempFilePath`
+  - [x] Add ID to Redis set (`rag:doc:all`)
+  - [x] Publish QStash message to `/internal/process-document` with payload `{ documentId }`
+  - [x] Return `202 Accepted` with `{ documentId, statusUrl }`
+- [x] `GET /documents` — list all documents from Redis
+- [x] `GET /documents/{id}/status` — polling endpoint; reads Redis hash
+- [x] `GET /documents/{id}/chunks` — fetches chunk vectors from Upstash Vector by docId filter
+- [x] `DELETE /documents/{id}` — remove document and all associated data
+  - [x] Delete Redis hash `rag:doc:{id}`
+  - [x] Remove from `rag:doc:all` set
+  - [x] Delete all Vector chunks where metadata `docId == {id}`
+  - [x] Clean up temp file if still present
 
 ### 6.2 InternalController (QStash callbacks)
 
-- [ ] `POST /internal/process-document`
-  - [ ] Verify QStash signature (reject 401 if invalid)
-  - [ ] Read `documentId` from JSON payload
-  - [ ] Read `tempFilePath` from Redis hash `rag:doc:{documentId}`
-  - [ ] Extract text from file (raw text for TXT/MD; use `PdfPig` NuGet for PDF extraction)
-  - [ ] Delete temp file after text extraction
-  - [ ] Update Redis status → `indexing`
-  - [ ] Chunk text using sliding window strategy (see 6.3)
-  - [ ] Embed each chunk via OpenAI embedding client
-  - [ ] Upsert to Upstash Vector with metadata: `{ docId, chunkIndex, text, source }`
-  - [ ] Update Redis status → `indexed`, store `chunkCount` and `indexedAt`
-  - [ ] On failure: update Redis status → `failed`, store `errorMessage`
+- [x] `POST /internal/process-document`
+  - [x] Verify QStash signature (reject 401 if invalid)
+  - [x] Read `documentId` from JSON payload
+  - [x] Read `tempFilePath` from Redis hash `rag:doc:{documentId}`
+  - [x] Extract text from file (raw text for TXT/MD; use `PdfPig` NuGet for PDF extraction)
+  - [x] Delete temp file after text extraction
+  - [x] Update Redis status → `indexing`
+  - [x] Chunk text using sliding window strategy (see 6.3)
+  - [x] Embed each chunk via OpenAI embedding client
+  - [x] Upsert to Upstash Vector with metadata: `{ docId, chunkIndex, text, source }`
+  - [x] Update Redis status → `indexed`, store `chunkCount` and `indexedAt`
+  - [x] On failure: update Redis status → `failed`, store `errorMessage`
 
 ### 6.3 Text Chunking (`RagQnA.Ingestion`)
 
-- [ ] Implement `ITextChunker` / `SlidingWindowChunker`
-  - [ ] Configurable `ChunkSize` (default 512) and `Overlap` (default 10%) from `IngestionOptions`
-  - [ ] Returns `IEnumerable<TextChunk>` with index and text
-  - [ ] > **Note:** Chunk size is measured in **words** (whitespace-split), not BPE tokens.
+- [x] Implement `ITextChunker` / `SlidingWindowChunker`
+  - [x] Configurable `ChunkSize` (default 512) and `Overlap` (default 10%) from `IngestionOptions`
+  - [x] Returns `IEnumerable<TextChunk>` with index and text
+  - [x] > **Note:** Chunk size is measured in **words** (whitespace-split), not BPE tokens.
         > This is an intentional simplification — add `Microsoft.ML.Tokenizers` later if
         > accurate token counting becomes important.
 

@@ -4,12 +4,16 @@ using Microsoft.OpenApi.Models;
 using RagQnA.Api.Middleware;
 using RagQnA.Contracts.Options;
 using RagQnA.Infrastructure.Extensions;
+using RagQnA.Ingestion.Extensions;
 using Scalar.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Infrastructure (clients + options)
 builder.Services.AddInfrastructure(builder.Configuration);
+
+// Ingestion (chunking + extraction)
+builder.Services.AddIngestion();
 
 // Controllers
 builder.Services.AddControllers();
