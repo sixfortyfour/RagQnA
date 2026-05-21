@@ -94,6 +94,12 @@ public sealed class UpstashRedisClient : IUpstashRedisClient
         return result;
     }
 
+    public async Task<long> HIncrByAsync(string key, string field, long increment)
+    {
+        var result = await ExecuteAsync<long>("HINCRBY", key, field, increment.ToString());
+        return result;
+    }
+
     // --- helpers ---
 
     private async Task<T> ExecuteAsync<T>(string command, params string[] args)

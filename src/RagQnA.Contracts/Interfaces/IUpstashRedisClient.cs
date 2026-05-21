@@ -13,4 +13,5 @@ public interface IUpstashRedisClient
     Task<IEnumerable<string>> KeysAsync(string pattern);
     Task<long> TtlAsync(string key);
     Task SRemAsync(string key, string member);
+    Task<long> HIncrByAsync(string key, string field, long increment);
 }

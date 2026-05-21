@@ -301,25 +301,25 @@ more testable and idiomatic in modern .NET.
 
 ### 7.1 QuestionsController
 
-- [ ] `POST /questions`
+- [x] `POST /questions`
   - Request: `{ "question": "string" }`
-  - [ ] **Normalise question:** lowercase + trim + collapse whitespace before hashing
-  - [ ] Hash normalised question (SHA256 → hex) → Redis cache key
-  - [ ] Check Redis cache → if HIT: `INCR rag:stats:hits`, return with `"cached": true`
-  - [ ] `INCR rag:stats:queries` and `rag:stats:misses`
-  - [ ] Embed normalised question via OpenAI embedding client
-  - [ ] Query Upstash Vector `top_k=5`
-  - [ ] Build RAG prompt with retrieved chunks as context
-  - [ ] Call Anthropic completion client
-  - [ ] Cache response in Redis (`SET rag:cache:{hash}` with TTL from `CacheOptions.TtlSeconds`)
-  - [ ] Record per-minute stat bucket
-  - [ ] Return `{ answer, cached, durationMs, sourceChunks[] }`
+  - [x] **Normalise question:** lowercase + trim + collapse whitespace before hashing
+  - [x] Hash normalised question (SHA256 → hex) → Redis cache key
+  - [x] Check Redis cache → if HIT: `INCR rag:stats:hits`, return with `"cached": true`
+  - [x] `INCR rag:stats:queries` and `rag:stats:misses`
+  - [x] Embed normalised question via OpenAI embedding client
+  - [x] Query Upstash Vector `top_k=5`
+  - [x] Build RAG prompt with retrieved chunks as context
+  - [x] Call Anthropic completion client
+  - [x] Cache response in Redis (`SET rag:cache:{hash}` with TTL from `CacheOptions.TtlSeconds`)
+  - [x] Record per-minute stat bucket
+  - [x] Return `{ answer, cached, durationMs, sourceChunks[] }`
 
 ### 7.2 Response Models (in Contracts)
 
-- [ ] `QuestionRequest`
-- [ ] `QuestionResponse` — `answer`, `cached`, `durationMs`, `sourceChunks[]`
-- [ ] `SourceChunk` — `text`, `documentId`, `chunkIndex`, `score`
+- [x] `QuestionRequest`
+- [x] `QuestionResponse` — `answer`, `cached`, `durationMs`, `sourceChunks[]`
+- [x] `SourceChunk` — `text`, `documentId`, `chunkIndex`, `score`
 
 ---
 
