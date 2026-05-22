@@ -14,10 +14,12 @@ function formatDate(iso: string) {
     <div v-if="store.loading" class="text-sm text-gray-400">Loading…</div>
     <div v-else-if="store.documents.length === 0" class="text-sm text-gray-400">No documents yet.</div>
     <div v-else class="space-y-2">
-      <div v-for="doc in store.documents" :key="doc.id" class="group relative">
-        <UploadProgressCard :doc="doc" />
+      <div v-for="doc in store.documents" :key="doc.id" class="group flex items-center gap-2">
+        <div class="flex-1 min-w-0">
+          <UploadProgressCard :doc="doc" />
+        </div>
         <button
-          class="absolute right-2 top-1/2 -translate-y-1/2 hidden group-hover:flex items-center justify-center w-6 h-6 rounded-full text-gray-400 hover:text-red-500 hover:bg-red-50 transition-colors"
+          class="shrink-0 invisible group-hover:visible flex items-center justify-center w-7 h-7 rounded-full text-gray-400 hover:text-red-500 hover:bg-red-50 transition-colors"
           title="Delete document"
           @click="store.remove(doc.id)"
         >
