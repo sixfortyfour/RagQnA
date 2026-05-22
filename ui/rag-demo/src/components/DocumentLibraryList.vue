@@ -3,23 +3,19 @@ import UploadProgressCard from './UploadProgressCard.vue'
 import { useDocumentsStore } from '@/stores/documents'
 
 const store = useDocumentsStore()
-
-function formatDate(iso: string) {
-  return new Date(iso).toLocaleString()
-}
 </script>
 
 <template>
   <div>
-    <div v-if="store.loading" class="text-sm text-gray-400">Loading…</div>
-    <div v-else-if="store.documents.length === 0" class="text-sm text-gray-400">No documents yet.</div>
+    <div v-if="store.loading" class="text-sm text-slate-500">Loading…</div>
+    <div v-else-if="store.documents.length === 0" class="text-sm text-slate-500">No documents yet.</div>
     <div v-else class="space-y-2">
       <div v-for="doc in store.documents" :key="doc.id" class="group flex items-center gap-2">
         <div class="flex-1 min-w-0">
           <UploadProgressCard :doc="doc" />
         </div>
         <button
-          class="shrink-0 invisible group-hover:visible flex items-center justify-center w-7 h-7 rounded-full text-gray-400 hover:text-red-500 hover:bg-red-50 transition-colors"
+          class="shrink-0 invisible group-hover:visible flex items-center justify-center w-7 h-7 rounded-full text-slate-500 hover:text-red-400 hover:bg-red-900/30 transition-colors"
           title="Delete document"
           @click="store.remove(doc.id)"
         >

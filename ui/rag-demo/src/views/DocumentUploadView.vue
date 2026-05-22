@@ -20,14 +20,14 @@ async function onFileSelected(file: File) {
 <template>
   <div class="space-y-8">
     <div>
-      <h1 class="text-2xl font-bold text-gray-900">Upload Documents</h1>
-      <p class="mt-1 text-sm text-gray-500">Upload PDF, TXT, or Markdown files to build your knowledge base.</p>
+      <h1 class="text-2xl font-bold text-white">Upload Documents</h1>
+      <p class="mt-1 text-sm text-slate-400">Upload PDF, TXT, or Markdown files to build your knowledge base.</p>
     </div>
 
     <FileDropZone @file-selected="onFileSelected" />
 
     <div>
-      <h2 class="text-base font-semibold text-gray-700 mb-3">Document Library</h2>
+      <h2 class="text-sm font-semibold text-slate-400 uppercase tracking-wide mb-3">Document Library</h2>
       <DocumentLibraryList />
     </div>
   </div>

@@ -43,5 +43,10 @@ export const useQuestionsStore = defineStore('questions', () => {
     }
   }
 
-  return { current, loading, error, history, ask }
+  function remove(question: string) {
+    history.value = history.value.filter((h) => h.question !== question)
+    saveHistory()
+  }
+
+  return { current, loading, error, history, ask, remove }
 })
