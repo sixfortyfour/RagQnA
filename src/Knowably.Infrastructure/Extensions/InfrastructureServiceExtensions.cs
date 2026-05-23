@@ -48,8 +48,9 @@ public static class InfrastructureServiceExtensions
         // QStash
         services.AddHttpClient<IQStashClient, QStashClient>("QStash");
 
-        // Ollama Embeddings
-        services.AddHttpClient<IEmbeddingClient, OllamaEmbeddingClient>("OllamaEmbedding");
+        // Ollama Embeddings — long timeout: local model embedding hundreds of chunks can take several minutes
+        services.AddHttpClient<IEmbeddingClient, OllamaEmbeddingClient>("OllamaEmbedding")
+            .ConfigureHttpClient(client => client.Timeout = TimeSpan.FromMinutes(10));
 
         // Ollama Completions
         services.AddHttpClient<ICompletionClient, OllamaCompletionClient>("OllamaCompletion");

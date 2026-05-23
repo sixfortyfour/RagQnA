@@ -45,7 +45,37 @@ public sealed class OllamaEmbeddingClient : IEmbeddingClient
         if (textList.Count == 0)
             return [];
 
-        var response = await _http.PostAsJsonAsync("api/embed", new { model = _model, input = textList }, JsonOptions);
+        // Split into sub-batches and process concurrently. Ollama is single-threaded so
+        // large parallelism doesn't help — 3 concurrent requests of ~20 keeps each request
+        // short while still saturating the model.
+        const int subBatchSize = 20;
+        const int maxConcurrency = 3;
+
+        var batches = textList.Chunk(subBatchSize).ToList();
+        var results = new float[textList.Count][];
+        var sem = new SemaphoreSlim(maxConcurrency);
+
+        await Task.WhenAll(batches.Select(async (batch, batchIndex) =>
+        {
+            await sem.WaitAsync();
+            try
+            {
+                var embeddings = await EmbedSubBatchAsync(batch);
+                for (var i = 0; i < embeddings.Count; i++)
+                    results[batchIndex * subBatchSize + i] = embeddings[i];
+            }
+            finally
+            {
+                sem.Release();
+            }
+        }));
+
+        return results;
+    }
+
+    private async Task<List<float[]>> EmbedSubBatchAsync(string[] texts)
+    {
+        var response = await _http.PostAsJsonAsync("api/embed", new { model = _model, input = texts }, JsonOptions);
         var body = await response.Content.ReadAsStringAsync();
 
         if (!response.IsSuccessStatusCode)
