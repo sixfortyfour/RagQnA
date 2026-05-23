@@ -283,7 +283,7 @@ RagQnA/
 
 | Layer | Technology |
 |-------|-----------|
-| API | ASP.NET Core 10, C# |
+| API | ASP.NET Core (.NET 8), C# |
 | Embeddings | Ollama `nomic-embed-text` (768 dimensions) |
 | Completions | Ollama `llama3.2` |
 | Vector store | Upstash Vector (cosine similarity) |

@@ -26,9 +26,9 @@ builder.Services.AddSwaggerGen(options =>
 {
     options.SwaggerDoc("v1", new OpenApiInfo
     {
-        Title = "RagQnA API",
+        Title = "Knowably API",
         Version = "v1",
-        Description = "RAG-powered document Q&A using Upstash, OpenAI, and Anthropic"
+        Description = "RAG-powered document Q&A using Upstash and Ollama"
     });
 });
 
@@ -74,7 +74,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.MapScalarApiReference(options =>
     {
-        options.Title = "RagQnA API";
+        options.Title = "Knowably API";
         options.Theme = ScalarTheme.Purple;
         options.OpenApiRoutePattern = "/swagger/v1/swagger.json";
     });
