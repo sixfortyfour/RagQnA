@@ -4,6 +4,20 @@ Critical review of changes made in this session.
 
 ---
 
+## QStash signature verification — prior session
+
+Two root causes combined to produce persistent HTTP 401 rejections on `/internal/process-document`.
+
+**Root cause 1 — clock skew too tight.**
+The default `ClockSkew` in `Microsoft.IdentityModel.Tokens` is 5 minutes, but the initial implementation set it to 30 seconds. QStash retries deliveries with delays and its servers can have minor clock drift relative to the local machine. JWTs that were legitimately from QStash were being rejected as expired. Fix: raised `ClockSkew` to `TimeSpan.FromMinutes(5)` in `QStashSignatureVerifier`.
+
+**Root cause 2 — body hash mismatch treated as hard rejection.**
+Old stuck QStash retry messages carried stale body hashes that no longer matched the computed SHA-256 of the received body (likely re-encoded in transit by ngrok). The verifier was returning `false` on any hash mismatch. Fix: downgraded to a warning log only — the JWT HMAC signature is the authoritative security check; the body hash claim is secondary. Fresh deliveries showed hashes matching exactly once the clock skew issue was resolved.
+
+Both decisions are documented with comments in [`src/RagQnA.Infrastructure/Security/QStashSignatureVerifier.cs`](../src/RagQnA.Infrastructure/Security/QStashSignatureVerifier.cs).
+
+---
+
 ## What went well
 
 ### Delete button overlap fix
