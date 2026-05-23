@@ -13,26 +13,17 @@ namespace Knowably.Api.Controllers;
 public sealed class InternalController : ControllerBase
 {
     private readonly IUpstashRedisClient _redis;
-    private readonly IUpstashVectorClient _vector;
-    private readonly IEmbeddingClient _embeddings;
-    private readonly ITextChunker _chunker;
-    private readonly ITextExtractor _extractor;
     private readonly QStashSignatureVerifier _signatureVerifier;
+    private readonly IServiceScopeFactory _scopeFactory;
 
     public InternalController(
         IUpstashRedisClient redis,
-        IUpstashVectorClient vector,
-        IEmbeddingClient embeddings,
-        ITextChunker chunker,
-        ITextExtractor extractor,
-        QStashSignatureVerifier signatureVerifier)
+        QStashSignatureVerifier signatureVerifier,
+        IServiceScopeFactory scopeFactory)
     {
         _redis = redis;
-        _vector = vector;
-        _embeddings = embeddings;
-        _chunker = chunker;
-        _extractor = extractor;
         _signatureVerifier = signatureVerifier;
+        _scopeFactory = scopeFactory;
     }
 
     [HttpPost("process-document")]
@@ -46,10 +37,7 @@ public sealed class InternalController : ControllerBase
         if (!Request.Headers.TryGetValue("Upstash-Signature", out var jwtValues) || string.IsNullOrEmpty(jwtValues))
             return Unauthorized("Missing Upstash-Signature header.");
 
-        var jwt = jwtValues.ToString();
-        var requestUrl = $"{Request.Scheme}://{Request.Host}{Request.Path}";
-
-        if (!_signatureVerifier.Verify(jwt, rawBody, requestUrl))
+        if (!_signatureVerifier.Verify(jwtValues.ToString(), rawBody, $"{Request.Scheme}://{Request.Host}{Request.Path}"))
             return Unauthorized("Invalid or expired Upstash-Signature.");
 
         var payload = JsonSerializer.Deserialize<ProcessDocumentPayload>(rawBody, JsonSerializerOptions.Web);
@@ -66,12 +54,26 @@ public sealed class InternalController : ControllerBase
 
         var fileName = fields.GetValueOrDefault("fileName") ?? documentId;
 
+        _ = Task.Run(() => ProcessInBackgroundAsync(documentId, tempFilePath, fileName));
+
+        return Ok(new { documentId, status = "processing" });
+    }
+
+    private async Task ProcessInBackgroundAsync(string documentId, string tempFilePath, string fileName)
+    {
+        using var scope = _scopeFactory.CreateScope();
+        var redis    = scope.ServiceProvider.GetRequiredService<IUpstashRedisClient>();
+        var vector   = scope.ServiceProvider.GetRequiredService<IUpstashVectorClient>();
+        var embedder = scope.ServiceProvider.GetRequiredService<IEmbeddingClient>();
+        var chunker  = scope.ServiceProvider.GetRequiredService<ITextChunker>();
+        var extractor = scope.ServiceProvider.GetRequiredService<ITextExtractor>();
+
         try
         {
             string text;
             try
             {
-                text = await _extractor.ExtractAsync(tempFilePath);
+                text = await extractor.ExtractAsync(tempFilePath);
             }
             finally
             {
@@ -79,58 +81,43 @@ public sealed class InternalController : ControllerBase
                     System.IO.File.Delete(tempFilePath);
             }
 
-            await _redis.HSetAsync($"rag:doc:{documentId}", new Dictionary<string, string>
+            await redis.HSetAsync($"rag:doc:{documentId}", new Dictionary<string, string>
             {
                 ["status"] = DocumentStatus.Indexing.ToString()
             });
 
-            var chunks = _chunker.Chunk(text).ToList();
+            var chunks = chunker.Chunk(text).ToList();
+            var vectors = (await embedder.EmbedBatchAsync(chunks.Select(c => c.Text))).ToList();
 
-            var chunkTexts = chunks.Select(c => c.Text);
-            var embeddings = (await _embeddings.EmbedBatchAsync(chunkTexts)).ToList();
-
-            var records = chunks.Zip(embeddings, (chunk, vector) => new VectorRecord
+            var records = chunks.Zip(vectors, (chunk, vec) => new VectorRecord
             {
                 Id = $"{documentId}_chunk_{chunk.Index}",
-                Vector = vector,
+                Vector = vec,
                 Metadata = new Dictionary<string, string>
                 {
-                    ["docId"] = documentId,
+                    ["docId"]      = documentId,
                     ["chunkIndex"] = chunk.Index.ToString(),
-                    ["text"] = chunk.Text,
-                    ["source"] = fileName
+                    ["text"]       = chunk.Text,
+                    ["source"]     = fileName
                 }
             }).ToList();
 
-            await _vector.UpsertAsync(records);
+            await vector.UpsertAsync(records);
 
-            await _redis.HSetAsync($"rag:doc:{documentId}", new Dictionary<string, string>
+            await redis.HSetAsync($"rag:doc:{documentId}", new Dictionary<string, string>
             {
-                ["status"] = DocumentStatus.Indexed.ToString(),
+                ["status"]     = DocumentStatus.Indexed.ToString(),
                 ["chunkCount"] = records.Count.ToString(),
-                ["indexedAt"] = DateTimeOffset.UtcNow.ToString("O")
+                ["indexedAt"]  = DateTimeOffset.UtcNow.ToString("O")
             });
-
-            return Ok(new { documentId, chunkCount = records.Count });
-        }
-        catch (InvalidDataException ex)
-        {
-            // Permanent failure — bad file content. Return 200 so QStash does not retry.
-            await _redis.HSetAsync($"rag:doc:{documentId}", new Dictionary<string, string>
-            {
-                ["status"] = DocumentStatus.Failed.ToString(),
-                ["errorMessage"] = ex.Message
-            });
-            return Ok(new { documentId, error = ex.Message });
         }
         catch (Exception ex)
         {
-            await _redis.HSetAsync($"rag:doc:{documentId}", new Dictionary<string, string>
+            await redis.HSetAsync($"rag:doc:{documentId}", new Dictionary<string, string>
             {
-                ["status"] = DocumentStatus.Failed.ToString(),
+                ["status"]       = DocumentStatus.Failed.ToString(),
                 ["errorMessage"] = ex.Message
             });
-            throw;
         }
     }
 
