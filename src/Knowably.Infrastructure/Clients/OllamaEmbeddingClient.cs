@@ -41,9 +41,20 @@ public sealed class OllamaEmbeddingClient : IEmbeddingClient
 
     public async Task<IEnumerable<float[]>> EmbedBatchAsync(IEnumerable<string> texts)
     {
-        var results = new List<float[]>();
-        foreach (var text in texts)
-            results.Add(await EmbedAsync(text));
-        return results;
+        var textList = texts.ToList();
+        if (textList.Count == 0)
+            return [];
+
+        var response = await _http.PostAsJsonAsync("api/embed", new { model = _model, input = textList }, JsonOptions);
+        var body = await response.Content.ReadAsStringAsync();
+
+        if (!response.IsSuccessStatusCode)
+            throw new InvalidOperationException($"Ollama embed failed ({response.StatusCode}): {body}");
+
+        using var doc = JsonDocument.Parse(body);
+        return doc.RootElement.GetProperty("embeddings")
+            .EnumerateArray()
+            .Select(e => e.EnumerateArray().Select(v => v.GetSingle()).ToArray())
+            .ToList();
     }
 }

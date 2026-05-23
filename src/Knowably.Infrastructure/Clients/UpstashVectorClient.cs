@@ -9,6 +9,8 @@ namespace Knowably.Infrastructure.Clients;
 
 public sealed class UpstashVectorClient : IUpstashVectorClient
 {
+    private const int UpsertBatchSize = 100;
+
     private readonly HttpClient _http;
 
     private static readonly JsonSerializerOptions JsonOptions = new()
@@ -24,15 +26,14 @@ public sealed class UpstashVectorClient : IUpstashVectorClient
 
     public async Task UpsertAsync(IEnumerable<VectorRecord> records)
     {
-        var payload = records.Select(r => new
-        {
-            id = r.Id,
-            vector = r.Vector,
-            metadata = r.Metadata
-        });
+        var batches = records.Chunk(UpsertBatchSize).ToList();
 
-        var response = await _http.PostAsJsonAsync("upsert", payload, JsonOptions);
-        await EnsureSuccessAsync(response, "upsert");
+        await Task.WhenAll(batches.Select(async batch =>
+        {
+            var payload = batch.Select(r => new { id = r.Id, vector = r.Vector, metadata = r.Metadata });
+            var response = await _http.PostAsJsonAsync("upsert", payload, JsonOptions);
+            await EnsureSuccessAsync(response, "upsert");
+        }));
     }
 
     public async Task<IEnumerable<VectorQueryResult>> QueryAsync(float[] vector, int topK, string? filter = null)
