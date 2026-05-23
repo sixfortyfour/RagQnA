@@ -19,6 +19,15 @@ public sealed class TextExtractor : ITextExtractor
 
     private static string ExtractPdf(string filePath)
     {
+        Span<byte> header = stackalloc byte[5];
+        using (var fs = File.OpenRead(filePath))
+        {
+            var read = fs.Read(header);
+            if (read < 5 || header[0] != 0x25 || header[1] != 0x50 ||
+                header[2] != 0x44 || header[3] != 0x46 || header[4] != 0x2D)
+                throw new InvalidDataException("File does not appear to be a valid PDF (missing %PDF- header).");
+        }
+
         using var document = PdfDocument.Open(filePath);
         var words = document.GetPages()
             .SelectMany(page => page.GetWords())

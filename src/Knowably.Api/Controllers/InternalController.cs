@@ -68,10 +68,16 @@ public sealed class InternalController : ControllerBase
 
         try
         {
-            var text = await _extractor.ExtractAsync(tempFilePath);
-
-            if (System.IO.File.Exists(tempFilePath))
-                System.IO.File.Delete(tempFilePath);
+            string text;
+            try
+            {
+                text = await _extractor.ExtractAsync(tempFilePath);
+            }
+            finally
+            {
+                if (System.IO.File.Exists(tempFilePath))
+                    System.IO.File.Delete(tempFilePath);
+            }
 
             await _redis.HSetAsync($"rag:doc:{documentId}", new Dictionary<string, string>
             {
@@ -106,6 +112,16 @@ public sealed class InternalController : ControllerBase
             });
 
             return Ok(new { documentId, chunkCount = records.Count });
+        }
+        catch (InvalidDataException ex)
+        {
+            // Permanent failure — bad file content. Return 200 so QStash does not retry.
+            await _redis.HSetAsync($"rag:doc:{documentId}", new Dictionary<string, string>
+            {
+                ["status"] = DocumentStatus.Failed.ToString(),
+                ["errorMessage"] = ex.Message
+            });
+            return Ok(new { documentId, error = ex.Message });
         }
         catch (Exception ex)
         {

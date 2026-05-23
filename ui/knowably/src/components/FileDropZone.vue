@@ -10,7 +10,7 @@ const ALLOWED = ['.pdf', '.txt', '.md']
 function validate(file: File): string | null {
   const ext = '.' + file.name.split('.').pop()?.toLowerCase()
   if (!ALLOWED.includes(ext)) return `Unsupported type "${ext}". Allowed: ${ALLOWED.join(', ')}`
-  if (file.size > 5 * 1024 * 1024) return 'File exceeds 5 MB limit.'
+  if (file.size > 20 * 1024 * 1024) return 'File exceeds 20 MB limit.'
   return null
 }
 
@@ -47,7 +47,7 @@ function onInput(e: Event) {
           d="M12 16v-8m0 0-3 3m3-3 3 3M6 20h12a2 2 0 002-2V8l-6-6H6a2 2 0 00-2 2v14a2 2 0 002 2z" />
       </svg>
       <span class="text-sm font-medium text-slate-300">Drop a file here or <span class="text-blue-400">browse</span></span>
-      <span class="text-xs text-slate-500">PDF, TXT, MD — max 5 MB</span>
+      <span class="text-xs text-slate-500">PDF, TXT, MD — max 20 MB</span>
     </div>
     <input type="file" class="hidden" accept=".pdf,.txt,.md" @change="onInput" />
   </label>
