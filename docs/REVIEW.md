@@ -50,7 +50,7 @@ The component is template-only, which is valid Vue 3, but unusual and may confus
 
 | # | Issue | Action |
 |---|-------|--------|
-| 1 | Live credentials can be committed | Remove `!appsettings.Development.json` from `.gitignore`, adopt User Secrets |
+| 1 | ~~Live credentials can be committed~~ | ✓ Fixed — removed `!appsettings.Development.json` from `.gitignore`, untracked the file, adopted .NET User Secrets |
 | 2 | Swagger/Scalar still say "RagQnA API" | Update `Program.cs` lines 29 and 77 |
 | 3 | README lists wrong .NET version | Change "ASP.NET Core 10" → "ASP.NET Core (.NET 8)" |
 | 4 | `.env.example` references removed providers | Replace OpenAI/Anthropic entries with Ollama entries |

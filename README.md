@@ -117,50 +117,26 @@ Copy the `https://` forwarding URL (e.g. `https://abc123.ngrok-free.app`) — yo
 
 ## 4. API configuration
 
-The API reads configuration from `appsettings.json` (committed, contains only defaults) and `appsettings.Development.json` (not committed, contains your secrets).
+The API reads configuration from `appsettings.json` (committed, safe defaults only). Secrets are stored using [.NET User Secrets](https://learn.microsoft.com/en-us/aspnet/core/security/app-secrets), which keeps credentials out of the repository entirely.
 
-Create `src/RagQnA.Api/appsettings.Development.json`:
+```bash
+cd src/RagQnA.Api
 
-```json
-{
-  "Logging": {
-    "LogLevel": {
-      "Default": "Information",
-      "Microsoft.AspNetCore": "Warning"
-    }
-  },
-  "UpstashRedis": {
-    "RestUrl": "https://<your-redis-url>.upstash.io",
-    "RestToken": "<your-redis-rest-token>"
-  },
-  "UpstashVector": {
-    "RestUrl": "https://<your-vector-url>.upstash.io",
-    "RestToken": "<your-vector-rest-token>"
-  },
-  "QStash": {
-    "Token": "<your-qstash-token>",
-    "CurrentSigningKey": "<your-current-signing-key>",
-    "NextSigningKey": "<your-next-signing-key>"
-  },
-  "Ollama": {
-    "BaseUrl": "http://localhost:11434",
-    "EmbeddingModel": "nomic-embed-text",
-    "CompletionModel": "llama3.2"
-  },
-  "Ingestion": {
-    "ChunkSize": 512,
-    "ChunkOverlapPercent": 10,
-    "MaxFileSizeMb": 5
-  },
-  "Cache": {
-    "TtlSeconds": 3600
-  },
-  "Monitor": {
-    "ApiKey": "your-monitor-key"
-  },
-  "ApiBaseUrl": "https://<your-ngrok-url>.ngrok-free.app"
-}
+dotnet user-secrets set "UpstashRedis:RestUrl"        "https://<your-redis-url>.upstash.io"
+dotnet user-secrets set "UpstashRedis:RestToken"      "<your-redis-rest-token>"
+
+dotnet user-secrets set "UpstashVector:RestUrl"       "https://<your-vector-url>.upstash.io"
+dotnet user-secrets set "UpstashVector:RestToken"     "<your-vector-rest-token>"
+
+dotnet user-secrets set "QStash:Token"                "<your-qstash-token>"
+dotnet user-secrets set "QStash:CurrentSigningKey"    "<your-current-signing-key>"
+dotnet user-secrets set "QStash:NextSigningKey"       "<your-next-signing-key>"
+
+dotnet user-secrets set "Monitor:ApiKey"              "your-monitor-key"
+dotnet user-secrets set "ApiBaseUrl"                  "https://<your-ngrok-url>.ngrok-free.app"
 ```
+
+User Secrets are stored in your OS user profile (not the repo) and are automatically loaded in the `Development` environment. The Ollama, Ingestion, and Cache sections have safe defaults in `appsettings.json` and only need overriding if you want non-default values.
 
 | Key | Description |
 |-----|-------------|

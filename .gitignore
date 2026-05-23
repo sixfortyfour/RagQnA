@@ -2,7 +2,6 @@
 .env
 appsettings.*.json
 !appsettings.json
-!appsettings.Development.json
 
 # .NET build output
 bin/
