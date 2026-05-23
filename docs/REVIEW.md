@@ -60,6 +60,28 @@ The component is template-only, which is valid Vue 3, but unusual and may confus
 
 ---
 
+## Architectural observations
+
+### A. Temp file locality — deployment blocker
+Uploaded files are saved to `Path.GetTempPath()` on the API server and the path is stored in Redis (`tempFilePath` field). This works on a single machine but silently breaks in any horizontally scaled or containerised deployment: QStash retries could hit a different instance than the one that wrote the file, causing the ingestion callback to fail with a missing file. The fix is to stream the file to object storage (e.g. Azure Blob, S3) on upload and store the blob URL in Redis instead.
+
+### B. Stale cache after document deletion
+`DELETE /documents/{id}` removes the Redis hash, the set entry, and the Vector chunks — but leaves any cached answers (`rag:cache:*`) that cited that document untouched. A subsequent cache hit returns an answer with source chunk `documentId` values that no longer exist. The fix is to flush the entire answer cache on any document deletion, or accept this as a known limitation given the cache TTL.
+
+### C. `TempFilePath` exposed in API response
+`DocumentsController.MapToMetadata` includes `TempFilePath` in the `GET /documents/{id}/status` response. This leaks the server's local filesystem layout to any API consumer. The field should be omitted from the response DTO — it is internal implementation detail only needed by the ingestion callback.
+
+### D. `IConfiguration` injected directly into a controller
+`DocumentsController` resolves `ApiBaseUrl` via `_configuration["ApiBaseUrl"]` rather than a typed options class. Every other config value in the codebase uses `IOptions<T>`. This is inconsistent and makes the dependency invisible to the DI container. `ApiBaseUrl` should be bound to a small options class and registered in `AddInfrastructure()`.
+
+### E. No streaming for completions
+`OllamaCompletionClient.CompleteAsync` waits for the full response before returning. For longer answers this can take 10–30 seconds with no incremental output — the user sees only the "Thinking…" spinner. Ollama supports streaming via `"stream": true`; returning a server-sent event stream from `POST /questions` would significantly improve perceived latency.
+
+### F. No authentication on public endpoints
+`/documents`, `/questions`, and `/stats` are completely open. Anyone who discovers the URL can upload files, trigger Ollama inference, and consume Upstash quota. Acceptable for a local portfolio demo, but worth noting before any public deployment.
+
+---
+
 ## Priority fixes
 
 | # | Issue | Action |
