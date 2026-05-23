@@ -14,7 +14,7 @@ The default `ClockSkew` in `Microsoft.IdentityModel.Tokens` is 5 minutes, but th
 **Root cause 2 — body hash mismatch treated as hard rejection.**
 Old stuck QStash retry messages carried stale body hashes that no longer matched the computed SHA-256 of the received body (likely re-encoded in transit by ngrok). The verifier was returning `false` on any hash mismatch. Fix: downgraded to a warning log only — the JWT HMAC signature is the authoritative security check; the body hash claim is secondary. Fresh deliveries showed hashes matching exactly once the clock skew issue was resolved.
 
-Both decisions are documented with comments in [`src/RagQnA.Infrastructure/Security/QStashSignatureVerifier.cs`](../src/RagQnA.Infrastructure/Security/QStashSignatureVerifier.cs).
+Both decisions are documented with comments in [`src/Knowably.Infrastructure/Security/QStashSignatureVerifier.cs`](../src/Knowably.Infrastructure/Security/QStashSignatureVerifier.cs).
 
 ---
 
@@ -34,17 +34,17 @@ Colour token choices are consistent throughout (`slate-900` cards, `slate-700` b
 ## What was wrong or missed
 
 ### 1. Incomplete rename — medium severity
-The rename from "RagQnA" to "Knowably" only touched the nav brand and `<title>`. Several places still say "RagQnA":
+The rename from "Knowably" to "Knowably" only touched the nav brand and `<title>`. Several places still say "Knowably":
 
-- `Program.cs` lines 29 and 77: Swagger/Scalar titles still read `"RagQnA API"`
-- Solution and project file names (`RagQnA.sln`, `RagQnA.Api.csproj`, etc.) are unchanged — acceptable for a backend rename but worth noting
+- `Program.cs` lines 29 and 77: Swagger/Scalar titles still read `"Knowably API"`
+- Solution and project file names (`Knowably.sln`, `Knowably.Api.csproj`, etc.) are unchanged — acceptable for a backend rename but worth noting
 - `.env.example` description is stale
 
 ### 2. `appsettings.Development.json` security risk — high severity
 The `.gitignore` contains `!appsettings.Development.json`, which explicitly un-ignores the file and means it *would* be committed if staged. It has been excluded from commits manually each session. This is fragile — one accidental `git add -A` exposes live Upstash and QStash credentials. The correct fix is to remove the `!` line from `.gitignore` and use [.NET User Secrets](https://learn.microsoft.com/en-us/aspnet/core/security/app-secrets) for local development.
 
 ### 3. README target framework incorrect — low severity
-The README tech stack table lists "ASP.NET Core 10" because `dotnet --version` returned `10.0.201` (the SDK version). The project actually targets `net8.0` per `RagQnA.Api.csproj`. SDK version ≠ target framework.
+The README tech stack table lists "ASP.NET Core 10" because `dotnet --version` returned `10.0.201` (the SDK version). The project actually targets `net8.0` per `Knowably.Api.csproj`. SDK version ≠ target framework.
 
 ### 4. `.env.example` not updated — low severity
 The example file still references `OPENAI_API_KEY` and `ANTHROPIC_API_KEY` from the original design. The project switched to Ollama sessions ago. This is the first file a new developer reads and it is misleading.
@@ -87,6 +87,6 @@ Uploaded files are saved to `Path.GetTempPath()` on the API server and the path 
 | # | Issue | Action |
 |---|-------|--------|
 | 1 | ~~Live credentials can be committed~~ | ✓ Fixed — removed `!appsettings.Development.json` from `.gitignore`, untracked the file, adopted .NET User Secrets |
-| 2 | Swagger/Scalar still say "RagQnA API" | Update `Program.cs` lines 29 and 77 |
+| 2 | Swagger/Scalar still say "Knowably API" | Update `Program.cs` lines 29 and 77 |
 | 3 | README lists wrong .NET version | Change "ASP.NET Core 10" → "ASP.NET Core (.NET 8)" |
 | 4 | `.env.example` references removed providers | Replace OpenAI/Anthropic entries with Ollama entries |

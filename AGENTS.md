@@ -30,12 +30,12 @@ Vue 3 + TypeScript frontends.
 
 ```
 [Demo UI]          [Monitor UI]
-rag-demo/          rag-monitor/
+knowably/          knowably-monitor/
 (Vue 3 + TS)       (Vue 3 + TS)
      |                   |
      └─────────┬─────────┘
                ▼
-       RagQnA.Api  (ASP.NET Core)
+       Knowably.Api  (ASP.NET Core)
        ┌────────────────────────┐
        │  /documents            │
        │  /questions            │
@@ -85,17 +85,17 @@ POST /questions
 
 ```
 RagQnA/
-├── RagQnA.sln
+├── Knowably.slnx
 ├── src/
-│   ├── RagQnA.Api/                  # ASP.NET Core host, controllers, middleware
-│   ├── RagQnA.Ingestion/            # Chunking, embedding orchestration
-│   ├── RagQnA.Infrastructure/       # Typed HTTP clients for all three Upstash products
-│   └── RagQnA.Contracts/            # DTOs, interfaces, enums (no dependencies)
+│   ├── Knowably.Api/                  # ASP.NET Core host, controllers, middleware
+│   ├── Knowably.Ingestion/            # Chunking, embedding orchestration
+│   ├── Knowably.Infrastructure/       # Typed HTTP clients for all three Upstash products
+│   └── Knowably.Contracts/            # DTOs, interfaces, enums (no dependencies)
 ├── tests/
-│   └── RagQnA.Tests/                # xUnit — unit tests for pure logic (no Upstash required)
+│   └── Knowably.Tests/                # xUnit — unit tests for pure logic (no Upstash required)
 ├── ui/
-│   ├── rag-demo/                    # Vue 3 + TS — public demo interface
-│   └── rag-monitor/                 # Vue 3 + TS — internal monitoring dashboard
+│   ├── knowably/                    # Vue 3 + TS — public demo interface
+│   └── knowably-monitor/                 # Vue 3 + TS — internal monitoring dashboard
 ├── .env.example
 ├── .gitignore
 └── README.md
@@ -145,14 +145,14 @@ RagQnA/
 
 ## 4. Phase 1 — Infrastructure Layer (C#)
 
-**Project:** `RagQnA.Infrastructure`
+**Project:** `Knowably.Infrastructure`
 
 All three Upstash products expose a REST API — no official C# SDK exists, so you'll build
 clean typed clients over `HttpClient`. This is a portfolio strength.
 
 ### 4.1 UpstashRedisClient
 
-- [x] Create `IUpstashRedisClient` interface in `RagQnA.Contracts`
+- [x] Create `IUpstashRedisClient` interface in `Knowably.Contracts`
 - [x] Implement `UpstashRedisClient : IUpstashRedisClient`
   - [x] `GetAsync(string key) → Task<string?>`
   - [x] `SetAsync(string key, string value, TimeSpan? ttl) → Task`
@@ -169,7 +169,7 @@ clean typed clients over `HttpClient`. This is a portfolio strength.
 
 ### 4.2 UpstashVectorClient
 
-- [x] Create `IUpstashVectorClient` interface in `RagQnA.Contracts`
+- [x] Create `IUpstashVectorClient` interface in `Knowably.Contracts`
 - [x] Implement `UpstashVectorClient : IUpstashVectorClient`
   - [x] `UpsertAsync(IEnumerable<VectorRecord> records) → Task`
   - [x] `QueryAsync(float[] vector, int topK, string? filter) → Task<IEnumerable<VectorQueryResult>>`
@@ -181,7 +181,7 @@ clean typed clients over `HttpClient`. This is a portfolio strength.
 
 ### 4.3 QStashClient
 
-- [x] Create `IQStashClient` interface in `RagQnA.Contracts`
+- [x] Create `IQStashClient` interface in `Knowably.Contracts`
 - [x] Implement `QStashClient : IQStashClient`
   - [x] `PublishAsync(string destinationUrl, object body, QStashOptions? options) → Task<string>`
   - [x] `GetMessageAsync(string messageId) → Task<QStashMessage>`
@@ -215,7 +215,7 @@ clean typed clients over `HttpClient`. This is a portfolio strength.
 Rather than reading `IConfiguration` directly, bind strongly-typed options classes. This is
 more testable and idiomatic in modern .NET.
 
-- [x] Define options classes in `RagQnA.Contracts`:
+- [x] Define options classes in `Knowably.Contracts`:
   - [x] `UpstashRedisOptions` — `RestUrl`, `RestToken`
   - [x] `UpstashVectorOptions` — `RestUrl`, `RestToken`
   - [x] `QStashOptions` — `Token`, `CurrentSigningKey`, `NextSigningKey`
@@ -236,7 +236,7 @@ more testable and idiomatic in modern .NET.
 
 ## 5. Phase 2 — Core API
 
-**Project:** `RagQnA.Api`
+**Project:** `Knowably.Api`
 
 - [x] Create ASP.NET Core Web API project (net8.0)
 - [x] Add `appsettings.json` / `appsettings.Development.json` with placeholder config keys
@@ -292,7 +292,7 @@ more testable and idiomatic in modern .NET.
   - [x] Update Redis status → `indexed`, store `chunkCount` and `indexedAt`
   - [x] On failure: update Redis status → `failed`, store `errorMessage`
 
-### 6.3 Text Chunking (`RagQnA.Ingestion`)
+### 6.3 Text Chunking (`Knowably.Ingestion`)
 
 - [x] Implement `ITextChunker` / `SlidingWindowChunker`
   - [x] Configurable `ChunkSize` (default 512) and `Overlap` (default 10%) from `IngestionOptions`
@@ -435,7 +435,7 @@ more testable and idiomatic in modern .NET.
 
 ## 11. Phase 8 — Testing
 
-**Project:** `RagQnA.Tests` (xUnit — no Upstash account required to run)
+**Project:** `Knowably.Tests` (xUnit — no Upstash account required to run)
 
 - [ ] `SlidingWindowChunkerTests` — chunk size, overlap, edge cases (empty input, single word)
 - [ ] `QuestionNormalisationTests` — casing, whitespace collapsing, trim
@@ -524,7 +524,7 @@ CACHE_TTL_SECONDS=3600
 | `System.Text.Json`             | JSON serialisation                            |
 | `Microsoft.IdentityModel.Tokens` | QStash JWT signature verification           |
 | `Microsoft.AspNetCore.OpenApi` | Swagger / Scalar API docs                     |
-| `xunit`                        | Unit testing (`RagQnA.Tests`)                 |
+| `xunit`                        | Unit testing (`Knowably.Tests`)                 |
 | `xunit.runner.visualstudio`    | Test runner integration                       |
 | `FluentAssertions`             | Readable test assertions                      |
 

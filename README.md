@@ -10,11 +10,11 @@ Documents are chunked, embedded via a local [Ollama](https://ollama.com) model, 
 
 ```
 [Knowably UI]
- rag-demo/
+ knowably/
  (Vue 3 + TS)
       |
       ▼
-RagQnA.Api  (ASP.NET Core — port 5146)
+Knowably.Api  (ASP.NET Core — port 5146)
 ┌────────────────────────────────────┐
 │  POST /documents                   │  ← upload file
 │  POST /questions                   │  ← ask question
@@ -120,7 +120,7 @@ Copy the `https://` forwarding URL (e.g. `https://abc123.ngrok-free.app`) — yo
 The API reads configuration from `appsettings.json` (committed, safe defaults only). Secrets are stored using [.NET User Secrets](https://learn.microsoft.com/en-us/aspnet/core/security/app-secrets), which keeps credentials out of the repository entirely.
 
 ```bash
-cd src/RagQnA.Api
+cd src/Knowably.Api
 
 dotnet user-secrets set "UpstashRedis:RestUrl"        "https://<your-redis-url>.upstash.io"
 dotnet user-secrets set "UpstashRedis:RestToken"      "<your-redis-rest-token>"
@@ -160,7 +160,7 @@ User Secrets are stored in your OS user profile (not the repo) and are automatic
 ## 5. Running the API
 
 ```bash
-cd src/RagQnA.Api
+cd src/Knowably.Api
 dotnet run
 ```
 
@@ -173,7 +173,7 @@ Interactive API docs are available at **http://localhost:5146/scalar** (developm
 ## 6. Running the frontend
 
 ```bash
-cd ui/rag-demo
+cd ui/knowably
 npm install
 npm run dev
 ```
@@ -196,17 +196,17 @@ The UI starts on **http://localhost:5173** and proxies `/api/*` requests to the 
 ## Project structure
 
 ```
-RagQnA/
+Knowably/
 ├── src/
-│   ├── RagQnA.Api/           # ASP.NET Core host, controllers, middleware
-│   ├── RagQnA.Contracts/     # DTOs, interfaces, enums — no dependencies
-│   ├── RagQnA.Infrastructure/ # Typed HTTP clients for Upstash + Ollama
-│   └── RagQnA.Ingestion/     # Text chunking and extraction
+│   ├── Knowably.Api/           # ASP.NET Core host, controllers, middleware
+│   ├── Knowably.Contracts/     # DTOs, interfaces, enums — no dependencies
+│   ├── Knowably.Infrastructure/ # Typed HTTP clients for Upstash + Ollama
+│   └── Knowably.Ingestion/     # Text chunking and extraction
 ├── tests/
-│   └── RagQnA.Tests/         # xUnit unit tests
+│   └── Knowably.Tests/         # xUnit unit tests
 ├── ui/
-│   └── rag-demo/             # Vue 3 + TypeScript — Knowably frontend
-└── RagQnA.sln
+│   └── knowably/             # Vue 3 + TypeScript — Knowably frontend
+└── Knowably.sln
 ```
 
 ---

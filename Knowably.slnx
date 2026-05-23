@@ -1,0 +1,11 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/Knowably.Api/Knowably.Api.csproj" />
+    <Project Path="src/Knowably.Contracts/Knowably.Contracts.csproj" />
+    <Project Path="src/Knowably.Infrastructure/Knowably.Infrastructure.csproj" />
+    <Project Path="src/Knowably.Ingestion/Knowably.Ingestion.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/Knowably.Tests/Knowably.Tests.csproj" />
+  </Folder>
+</Solution>
