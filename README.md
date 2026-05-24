@@ -61,7 +61,7 @@ POST /questions
 
 | Tool | Version | Notes |
 |------|---------|-------|
-| [.NET SDK](https://dotnet.microsoft.com/download) | 10.0+ | `dotnet --version` to verify |
+| [.NET SDK](https://dotnet.microsoft.com/download) | 8.0+ | `dotnet --version` to verify |
 | [Node.js](https://nodejs.org) | 20.19+ or 22.12+ | `node --version` to verify |
 | [Ollama](https://ollama.com) | Latest | Runs the local LLM |
 | [ngrok](https://ngrok.com) | Latest | Exposes the local API to QStash |
@@ -132,7 +132,7 @@ dotnet user-secrets set "QStash:Token"                "<your-qstash-token>"
 dotnet user-secrets set "QStash:CurrentSigningKey"    "<your-current-signing-key>"
 dotnet user-secrets set "QStash:NextSigningKey"       "<your-next-signing-key>"
 
-dotnet user-secrets set "Monitor:ApiKey"              "your-monitor-key"
+dotnet user-secrets set "Monitor:ApiKey"              "<your-monitor-key>"
 dotnet user-secrets set "ApiBaseUrl"                  "https://<your-ngrok-url>.ngrok-free.app"
 ```
 
